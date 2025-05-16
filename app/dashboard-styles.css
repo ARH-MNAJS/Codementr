@@ -1,0 +1,233 @@
+/* Dashboard Dark Theme Styles */
+:root {
+  --dark-bg: #0a0a0a;
+  --card-bg: rgba(25, 25, 25, 0.65);
+  --card-hover: rgba(35, 35, 35, 0.75);
+  --accent-purple: rgb(138, 43, 226);
+  --accent-purple-light: rgba(138, 43, 226, 0.15);
+  --accent-purple-medium: rgba(138, 43, 226, 0.3);
+  --border-light: rgba(255, 255, 255, 0.05);
+  --border-hover: rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-bg {
+  background-color: var(--dark-bg);
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(75, 0, 130, 0.15), transparent 25%),
+    radial-gradient(circle at 80% 70%, rgba(138, 43, 226, 0.1), transparent 25%);
+}
+
+/* Glassmorphic elements */
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: var(--card-hover);
+  border-color: var(--border-hover);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Dashboard sidebar */
+.dashboard-sidebar {
+  background: rgba(20, 20, 20, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-right: 1px solid var(--border-light);
+  transition: width 0.3s ease;
+}
+
+.sidebar-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  margin-bottom: 0.75rem;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-icon:hover, .sidebar-icon.active {
+  background: var(--accent-purple-light);
+  color: white;
+}
+
+.sidebar-icon.active {
+  border-left: 3px solid var(--accent-purple);
+}
+
+/* Step cards */
+.step-card {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  background: rgba(30, 30, 30, 0.7);
+  border: 1px solid var(--border-light);
+  transition: all 0.2s ease;
+}
+
+.step-card:hover {
+  background: rgba(40, 40, 40, 0.85);
+  border-color: var(--accent-purple-medium);
+}
+
+.step-number {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--accent-purple-light);
+  border: 1px solid var(--accent-purple-medium);
+  margin-right: 1rem;
+  font-weight: 600;
+}
+
+.step-active .step-number {
+  background: var(--accent-purple);
+  color: white;
+}
+
+/* Drop zones */
+.drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  background: rgba(25, 25, 25, 0.5);
+  border: 1px dashed var(--border-light);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.drop-zone:hover {
+  background: rgba(35, 35, 35, 0.6);
+  border-color: var(--accent-purple-medium);
+}
+
+/* Pills/Tags */
+.tag-pill {
+  display: inline-flex;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgba(30, 30, 30, 0.7);
+  border: 1px solid var(--border-light);
+  margin-right: 0.5rem;
+}
+
+.tag-new {
+  background: var(--accent-purple-light);
+  border-color: var(--accent-purple-medium);
+  color: rgb(200, 150, 255);
+}
+
+.tag-hot {
+  background: rgba(255, 100, 100, 0.15);
+  border-color: rgba(255, 100, 100, 0.3);
+  color: rgb(255, 150, 150);
+}
+
+/* Custom button */
+.btn-dark {
+  background-color: #333;
+  color: white;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-dark:hover {
+  background-color: #444;
+  transform: translateY(-2px);
+}
+
+.btn-accent {
+  background: linear-gradient(90deg, #7028e4, #e5b2ca);
+  border: none;
+  color: white;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-accent:hover {
+  box-shadow: 0 5px 15px rgba(112, 40, 228, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Data tables and rows */
+.data-row {
+  background: rgba(30, 30, 30, 0.5);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+  padding: 1rem;
+}
+
+.data-row:hover {
+  background: rgba(40, 40, 40, 0.7);
+  transform: translateX(2px);
+}
+
+/* Dashboard grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Stat cards */
+.stat-card {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+}
+
+.stat-trend {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.stat-trend.positive {
+  color: rgb(74, 222, 128);
+}
+
+.stat-trend.negative {
+  color: rgb(248, 113, 113);
+} 
