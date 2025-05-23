@@ -4,10 +4,40 @@ import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { Milestone, Project } from "@/types/db";
 
 // Initialize Google Generative AI with your API key
 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey || "");
+
+interface GithubFile {
+  filename: string;
+  status: string;
+  additions: number;
+  deletions: number;
+  changes: number;
+  raw_url: string;
+  patch?: string;
+}
+
+interface CommitAnalysisResponse {
+  overallAssessment: string;
+  goalsAchieved: Array<{
+    goal: string;
+    achieved: boolean;
+    explanation: string;
+  }>;
+  metrics: {
+    goalAlignment: number;
+    securityRisk: number;
+    codeQuality: number;
+    commitClarity: number;
+  };
+  suggestions: string[];
+  shouldComplete: boolean;
+  confidenceScore: number;
+  description: string;
+}
 
 export async function POST(
   req: NextRequest,
@@ -39,7 +69,7 @@ export async function POST(
     
     // Get the project
     const projectsCollection = await getCollection('projects');
-    const project = await projectsCollection.findOne({ _id: new ObjectId(params.id) });
+    const project = await projectsCollection.findOne({ _id: new ObjectId(params.id) }) as Project | null;
     
     if (!project) {
       console.log("Project not found");
@@ -61,7 +91,7 @@ export async function POST(
     
     // Find the milestone
     const milestoneIndex = project.milestones.findIndex(
-      (m: any) => m.title === milestoneTitle
+      (m: Milestone) => m.title === milestoneTitle
     );
     
     if (milestoneIndex === -1) {
@@ -94,7 +124,7 @@ export async function POST(
     const commitData = await response.json();
     
     // Extract files information
-    const filesInfo = commitData.files.map((file: any) => ({
+    const filesInfo = commitData.files.map((file: GithubFile) => ({
       filename: file.filename,
       status: file.status, // 'added', 'modified', or 'removed'
       additions: file.additions,
@@ -198,99 +228,84 @@ IMPORTANT: Ensure your response is valid JSON and follows this exact structure.
       const result = await model.generateContent(prompt);
       const responseText = result.response.text();
       
-      // Extract JSON from response
-      let analysis;
+      // Parse the AI response
+      let aiAnalysis: CommitAnalysisResponse;
       try {
-        // Find JSON between triple backticks if present
-        const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/) || 
-                         responseText.match(/```\n([\s\S]*?)\n```/) ||
-                         [null, responseText];
-                         
-        const jsonString = jsonMatch[1];
-        analysis = JSON.parse(jsonString);
+        // Extract the JSON content from the response
+        const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) || 
+                          responseText.match(/```([\s\S]*?)```/) ||
+                          [null, responseText];
+                          
+        const jsonStr = jsonMatch[1].trim();
+        aiAnalysis = JSON.parse(jsonStr);
+      } catch (error) {
+        console.error("Failed to parse AI response:", error);
+        console.log("Raw AI response:", responseText);
         
-        console.log("Successfully parsed AI analysis");
-        
-        // Update milestone status and goals if AI suggests completion
-        if (analysis.shouldComplete) {
-          console.log("AI suggests completing the milestone");
-          
-          // Mark applicable goals as completed
-          const completedGoals = [
-            ...(milestone.completedGoals || [])
-          ];
-          
-          // Add goals that AI identified as achieved
-          analysis.goalsAchieved.forEach((goalResult: any) => {
-            if (goalResult.achieved && !completedGoals.includes(goalResult.goal)) {
-              completedGoals.push(goalResult.goal);
-            }
-          });
-          
-          // Calculate if all goals are completed
-          const allGoalsCompleted = goals.length > 0 && 
-            goals.every(g => completedGoals.includes(g));
-            
-          // Update the milestone in the database
-          await projectsCollection.updateOne(
-            { _id: new ObjectId(params.id) },
-            { 
-              $set: { 
-                [`milestones.${milestoneIndex}.completed`]: allGoalsCompleted,
-                [`milestones.${milestoneIndex}.completedGoals`]: completedGoals
-              } 
-            }
-          );
-          
-          console.log(`Updated milestone: completed=${allGoalsCompleted}, completedGoals=[${completedGoals.join(', ')}]`);
-        }
-        
-        // Store the analysis in the database
-        const analysisCollection = await getCollection('commitAnalyses');
-        await analysisCollection.insertOne({
-          projectId: params.id,
-          milestoneTitle,
-          commitSha,
-          analysis,
-          createdAt: new Date()
-        });
-        
-        console.log("Stored analysis in database");
-        
-        return NextResponse.json({ 
-          analysis,
-          commitDetails: {
-            sha: commitSha,
-            message: commitData.commit.message,
-            author: commitData.commit.author.name,
-            date: commitData.commit.author.date,
-            filesChanged: filesInfo.length
-          }
-        });
-        
-      } catch (jsonError) {
-        console.error("Failed to parse AI response as JSON:", jsonError);
-        return NextResponse.json({ 
-          error: "Failed to parse AI analysis",
-          aiResponse: responseText 
-        }, { status: 500 });
+        // Return a default structure with error information
+        aiAnalysis = {
+          overallAssessment: "Error: Could not analyze commit properly.",
+          goalsAchieved: goals.map(goal => ({
+            goal,
+            achieved: false,
+            explanation: "Could not determine due to parsing error."
+          })),
+          metrics: {
+            goalAlignment: 0,
+            securityRisk: 50,
+            codeQuality: 0,
+            commitClarity: 0
+          },
+          suggestions: ["Try again with a more specific commit."],
+          shouldComplete: false,
+          confidenceScore: 0,
+          description: "An error occurred while trying to analyze this commit. The AI response could not be parsed correctly."
+        };
       }
       
-    } catch (aiError) {
-      console.error("AI analysis error:", aiError);
-      return NextResponse.json({ 
-        error: "Failed to generate AI analysis", 
-        details: aiError.message 
-      }, { status: 500 });
+      // Update the milestone based on the AI analysis
+      const updatedMilestones = [...project.milestones];
+      
+      // If AI thinks the milestone is complete with high confidence, mark it as completed
+      if (aiAnalysis.shouldComplete && aiAnalysis.confidenceScore >= 70) {
+        updatedMilestones[milestoneIndex].completed = true;
+        
+        // Mark the achieved goals
+        const completedGoals = aiAnalysis.goalsAchieved
+          .filter(g => g.achieved)
+          .map(g => g.goal);
+          
+        updatedMilestones[milestoneIndex].completedGoals = completedGoals;
+      }
+      
+      // Save the update
+      await projectsCollection.updateOne(
+        { _id: new ObjectId(params.id) },
+        { $set: { milestones: updatedMilestones } }
+      );
+      
+      // Return the analysis results
+      return NextResponse.json({
+        success: true,
+        analysis: aiAnalysis,
+        milestoneCompleted: updatedMilestones[milestoneIndex].completed
+      });
+      
+    } catch (error) {
+      console.error("AI analysis error:", error);
+      if (error instanceof Error) {
+        return NextResponse.json({ error: `AI analysis failed: ${error.message}` }, { status: 500 });
+      } else {
+        return NextResponse.json({ error: "AI analysis failed with unknown error" }, { status: 500 });
+      }
     }
     
-  } catch (error: any) {
-    console.error("Error analyzing commit:", error);
-    console.log("=== COMMIT ANALYSIS DEBUG END (ERROR) ===");
-    
-    return NextResponse.json(
-      { error: error.message || "Internal server error" },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error("Commit analysis error:", error);
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    } else {
+      return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
+    }
   }
 } 

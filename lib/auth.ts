@@ -2,6 +2,9 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
+// Re-export authOptions for use in API routes
+export { authOptions };
+
 // Define the extended session type
 export interface ExtendedSession {
   user?: {

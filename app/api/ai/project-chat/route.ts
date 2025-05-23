@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getCollection } from '@/lib/db';
 import { ObjectId } from 'mongodb';
+import { Milestone } from '@/types/db';
 
 // Initialize Google Generative AI with your API key
 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
@@ -59,10 +60,6 @@ export async function POST(req: NextRequest) {
         userData = await usersCollection.findOne({ _id: new ObjectId(project.userId) });
       }
 
-      // Fetch project progress data
-      const progressCollection = await getCollection('projectProgress');
-      const progressData = await progressCollection.find({ projectId: project._id.toString() }).toArray();
-
       // Fetch commit data if available
       const commitsCollection = await getCollection('commits');
       const commitData = await commitsCollection.find({ projectId: project._id.toString() }).toArray();
@@ -73,11 +70,11 @@ export async function POST(req: NextRequest) {
       
       // Extract comprehensive milestone information including technical details
       let milestonesInfo = "";
-      let technicalTerms = new Set<string>();
-      let fileTypes = new Set<string>();
+      const technicalTerms = new Set<string>();
+      const fileTypes = new Set<string>();
       
       if (project.milestones && Array.isArray(project.milestones)) {
-        milestonesInfo = project.milestones.map((m: any, index: number) => {
+        milestonesInfo = project.milestones.map((m: Milestone, index: number) => {
           // Check if this milestone is completed
           const isCompleted = m.completed || false;
           const milestoneStatus = isCompleted ? "COMPLETED" : (index === 0 || (index > 0 && project.milestones[index-1].completed) ? "ACTIVE" : "PENDING");
@@ -243,24 +240,24 @@ Provide a helpful response based on the specific project details available.
       }
   
       return NextResponse.json({ response: finalResponse });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error from Gemini API:", error);
       return NextResponse.json(
         { 
           error: 'Error from AI provider',
-          message: error.message || "Unknown error from Gemini API"
+          message: error instanceof Error ? error.message : "Unknown error from Gemini API"
         },
         { status: 500 }
       );
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error generating chat response:', error);
     // Return more detailed error information
     return NextResponse.json(
       { 
         error: 'Failed to generate chat response',
-        message: error.message || 'Unknown error',
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: process.env.NODE_ENV === 'development' && error instanceof Error ? error.stack : undefined
       },
       { status: 500 }
     );

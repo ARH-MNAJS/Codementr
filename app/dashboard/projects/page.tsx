@@ -57,7 +57,7 @@ export default function StudentProjects() {
     setIsLoading(true);
     try {
       // Build query params based on user's college and branch
-      let queryParams = new URLSearchParams();
+      const queryParams = new URLSearchParams();
       
       if (search) {
         queryParams.append('search', search);

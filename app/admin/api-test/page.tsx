@@ -8,8 +8,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 
+interface ApiResponse {
+  success?: boolean;
+  message?: string;
+  context?: string;
+  error?: string;
+  [key: string]: unknown;
+}
+
 export default function ApiTest() {
-  const [testResult, setTestResult] = useState<any>(null);
+  const [testResult, setTestResult] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -41,9 +49,13 @@ export default function ApiTest() {
       const data = await response.json();
       
       setTestResult(data);
-    } catch (error: any) {
+    } catch (error) {
       console.error("API test failed:", error);
-      setError(error.message || "Unknown error");
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Unknown error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -70,9 +82,13 @@ export default function ApiTest() {
       
       const data = await response.json();
       setTestResult(data);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Context generation failed:", error);
-      setError(error.message || "Unknown error");
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Unknown error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -102,9 +118,13 @@ export default function ApiTest() {
       
       const data = await response.json();
       setTestResult(data);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Context generation failed:", error);
-      setError(error.message || "Unknown error");
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Unknown error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -131,9 +151,13 @@ export default function ApiTest() {
       
       const data = await response.json();
       setTestResult(data);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Context generation failed:", error);
-      setError(error.message || "Unknown error");
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Unknown error occurred");
+      }
     } finally {
       setIsLoading(false);
     }

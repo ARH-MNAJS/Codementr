@@ -11,6 +11,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useUser } from "@/hooks/useUser";
 import { Badge } from "@/components/ui/badge";
 
+interface GithubRepository {
+  name: string;
+  full_name: string;
+  description: string;
+  html_url: string;
+}
+
 interface ProjectCardProps {
   project: Project;
   variant: "admin" | "student";
@@ -21,7 +28,7 @@ interface ProjectCardProps {
 export function ProjectCard({ project, variant, onConnectRepo, onDisconnectRepo }: ProjectCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDisconnectDialogOpen, setIsDisconnectDialogOpen] = useState(false);
-  const [repos, setRepos] = useState<any[]>([]);
+  const [repos, setRepos] = useState<GithubRepository[]>([]);
   const [selectedRepo, setSelectedRepo] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useUser();
@@ -237,7 +244,7 @@ export function ProjectCard({ project, variant, onConnectRepo, onDisconnectRepo 
                 </p>
                 {repos.map((repo) => (
                   <div 
-                    key={repo.id} 
+                    key={repo.name} 
                                           className={`p-3 border rounded-md cursor-pointer transition-colors ${
                       selectedRepo === repo.name 
                         ? "border-[#ad46ff] bg-[#ad46ff1a] dark:bg-[#ad46ff33]" 

@@ -4,30 +4,30 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 
-interface Column {
+interface Column<T> {
   key: string;
   header: string;
   width?: string;
-  render?: (value: any, row: any) => React.ReactNode;
+  render?: (value: unknown, row: T) => React.ReactNode;
 }
 
-interface DataTableProps {
-  columns: Column[];
-  data: any[];
+interface DataTableProps<T> {
+  columns: Column<T>[];
+  data: T[];
   title?: string;
   count?: number;
   className?: string;
   onViewAll?: () => void;
 }
 
-export function DataTable({
+export function DataTable<T extends Record<string, unknown>>({
   columns,
   data,
   title,
   count,
   className,
   onViewAll,
-}: DataTableProps) {
+}: DataTableProps<T>) {
   return (
     <div className={cn(
       'glass-card p-0 overflow-hidden border border-white/5',
