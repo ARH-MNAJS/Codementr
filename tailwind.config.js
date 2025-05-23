@@ -4,7 +4,13 @@ module.exports = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  darkMode: 'class',
+  darkMode: ['class'],
+  safelist: [
+    'dark:text-white',
+    'text-white',
+    'dark:bg-black',
+    'bg-white'
+  ],
   theme: {
     extend: {
       colors: {
@@ -41,6 +47,10 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      textColor: {
+        // Add explicit text color white for dark mode
+        white: '#ffffff'
       },
     },
   },
