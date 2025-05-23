@@ -23,13 +23,18 @@ function Avatar({
 
 function AvatarImage({
   className,
+  src,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Image>) {
+  // Only include src if it exists and is not an empty string
+  // This prevents the "An empty string was passed to the src attribute" warning
+  const imgProps = src ? { src, ...props } : { ...props };
+  
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
       className={cn("aspect-square size-full", className)}
-      {...props}
+      {...imgProps}
     />
   )
 }

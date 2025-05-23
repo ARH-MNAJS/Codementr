@@ -115,33 +115,50 @@
   }
   body {
     @apply bg-background text-foreground;
+    @apply dark:bg-black bg-white;
+    @apply dark:text-white text-gray-800;
+  }
+
+  .dark body {
     background-color: black;
     background-image: 
       radial-gradient(circle at 20% 30%, rgba(120, 80, 220, 0.08), transparent 25%),
       radial-gradient(circle at 80% 70%, rgba(100, 90, 255, 0.05), transparent 25%);
   }
+
+  body {
+    background-color: white;
+    background-image: 
+      radial-gradient(circle at 20% 30%, rgba(120, 80, 220, 0.04), transparent 25%),
+      radial-gradient(circle at 80% 70%, rgba(100, 90, 255, 0.03), transparent 25%);
+  }
 }
 
 /* Purple gradient background */
 .purple-gradient {
-  background: linear-gradient(135deg, #8b5cf6, #6d28d9, #4c1d95);
+  @apply dark:bg-gradient-to-r dark:from-purple-700 dark:via-purple-600 dark:to-indigo-800;
+  @apply bg-gradient-to-r from-purple-500 via-purple-400 to-indigo-500;
   background-size: 200% 200%;
 }
 
 /* Static purple gradient for header or hero sections */
 .purple-static-gradient {
-  background: linear-gradient(to right, #8b5cf6, #6d28d9);
+  @apply dark:bg-gradient-to-r dark:from-purple-700 dark:to-indigo-800;
+  @apply bg-gradient-to-r from-purple-500 to-indigo-500;
 }
 
 /* Dark background with subtle glow */
 .dark-glow-bg {
-  background-color: #000;
-  background-image: radial-gradient(circle at 50% 0%, rgba(59, 30, 114, 0.35), transparent 60%);
+  @apply dark:bg-black bg-white;
+  @apply dark:bg-[radial-gradient(circle_at_50%_0%,rgba(59,30,114,0.35),transparent_60%)];
+  @apply bg-[radial-gradient(circle_at_50%_0%,rgba(59,30,114,0.15),transparent_60%)];
+  @apply dark:text-white text-gray-800;
 }
 
 /* Gradient text styling */
 .gradient-text {
-  background: linear-gradient(90deg, #9c8bff 0%, #f5a9db 100%);
+  @apply dark:bg-gradient-to-r dark:from-purple-400 dark:to-pink-300;
+  @apply bg-gradient-to-r from-purple-700 to-pink-600;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -150,23 +167,25 @@
 
 /* Card styles */
 .glass-card {
-  background-color: rgba(20, 20, 20, 0.5);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  @apply dark:bg-gray-900/50 bg-white/90;
+  @apply dark:backdrop-blur-xl backdrop-blur-sm;
+  @apply dark:border-white/5 border-gray-200;
+  @apply dark:shadow-lg shadow-md;
+  @apply dark:text-white text-gray-800;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
 .glass-card:hover {
-  background-color: rgba(30, 30, 30, 0.6);
-  border-color: rgba(255, 255, 255, 0.1);
+  @apply dark:bg-gray-800/60 bg-white/95;
+  @apply dark:border-white/10 border-gray-300;
 }
 
 .glass-panel {
-  background-color: rgba(20, 20, 20, 0.7);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  @apply dark:bg-gray-900/70 bg-white/90;
+  @apply dark:backdrop-blur-2xl backdrop-blur-sm;
+  @apply dark:border-white/5 border-gray-200;
+  @apply dark:text-white text-gray-800;
 }
 
 /* Tags/Pills */
@@ -296,4 +315,41 @@
   100% {
     box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
   }
+}
+
+/* Table styles for better contrast */
+table {
+  @apply w-full border-collapse;
+}
+
+th {
+  @apply dark:text-gray-200 text-gray-800 font-semibold;
+  @apply dark:bg-gray-800/50 bg-gray-100/80;
+  @apply px-4 py-3 text-left;
+}
+
+td {
+  @apply dark:text-gray-300 text-gray-700;
+  @apply px-4 py-3;
+}
+
+tr {
+  @apply dark:border-gray-700 border-gray-200 border-b;
+}
+
+tr:hover {
+  @apply dark:bg-gray-800/50 bg-gray-100/50;
+}
+
+/* Input styles with better contrast */
+input, select, textarea {
+  @apply dark:bg-gray-800 bg-white;
+  @apply dark:border-gray-700 border-gray-300;
+  @apply dark:text-white text-gray-800;
+  @apply dark:placeholder-gray-500 placeholder-gray-400;
+}
+
+/* Button styles */
+button {
+  @apply dark:text-white text-gray-800;
 }

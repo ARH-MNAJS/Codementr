@@ -12,63 +12,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LucideBell, LucideSearch } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { LucideBell } from "lucide-react";
 
 interface TopbarProps {
   isSidebarCollapsed?: boolean;
 }
 
-export function Topbar({ isSidebarCollapsed = false }: TopbarProps) {
+export function Topbar({ isSidebarCollapsed = true }: TopbarProps) {
   const { user } = useUser();
-  const pathname = usePathname();
-  
-  // Get page title from pathname
-  const getPageTitle = () => {
-    if (pathname === '/dashboard' || pathname === '/') {
-      return 'Home';
-    }
-    
-    const path = pathname.split('/').filter(Boolean);
-    
-    if (path.length === 0) return 'Home';
-    
-    if (path[0] === 'admin') {
-      return path.length > 1 ? path[1].charAt(0).toUpperCase() + path[1].slice(1) : 'Admin';
-    }
-    
-    if (path[0] === 'dashboard') {
-      return path.length > 1 ? path[1].charAt(0).toUpperCase() + path[1].slice(1) : 'Dashboard';
-    }
-    
-    return path[0].charAt(0).toUpperCase() + path[0].slice(1);
-  };
 
   return (
-    <div
-      className={`fixed top-0 right-0 z-30 flex h-16 items-center justify-between glass-panel border-b border-white/5 px-6 ${
-        isSidebarCollapsed ? "left-[70px]" : "left-[240px]"
-      } transition-all duration-200`}
-    >
+    <div className="fixed top-0 right-0 z-30 flex h-16 items-center justify-between glass-panel border-b border-white/5 px-6 left-[70px] transition-all duration-200 dark:bg-gray-900 bg-gray-100">
       <div className="flex items-center">
-        <div className="text-lg font-medium text-white">{getPageTitle()}</div>
+        {/* Empty div to maintain layout */}
       </div>
       
       <div className="flex items-center space-x-5">
-        {/* Search */}
-        <div className="relative hidden md:flex items-center">
-          <div className="absolute left-3">
-            <LucideSearch className="h-4 w-4 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            placeholder="Search..."
-            className="h-9 w-64 rounded-md bg-black/30 border border-white/10 pl-9 pr-4 text-sm text-gray-300 focus:outline-none focus:ring-1 focus:ring-purple-500"
-          />
-        </div>
-        
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative text-gray-400 hover:text-white">
+        <Button variant="ghost" size="icon" className="relative dark:text-gray-400 text-gray-500 hover:bg-purple-100/90 dark:hover:bg-purple-900/80 hover:text-purple-700 dark:hover:text-purple-300 cursor-pointer transition-all duration-200">
           <LucideBell size={18} />
           <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-purple-600 text-[10px] flex items-center justify-center text-white">
             3
@@ -78,33 +39,33 @@ export function Topbar({ isSidebarCollapsed = false }: TopbarProps) {
         {/* Profile dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-transparent">
-              <Avatar className="h-8 w-8 ring-1 ring-white/10">
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-purple-100/90 dark:hover:bg-purple-900/80 p-0 cursor-pointer transition-all duration-200">
+              <Avatar className="h-8 w-8 ring-1 dark:ring-white/10 ring-gray-300/30">
                 <AvatarImage
-                  src={user?.image || ""}
+                  src={user?.image || undefined}
                   alt={user?.name || "User"}
                 />
-                <AvatarFallback className="bg-gray-800 text-gray-300">
+                <AvatarFallback className="dark:bg-gray-800 bg-gray-200 dark:text-gray-300 text-gray-600">
                   {user?.name?.charAt(0) || "U"}
                 </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 bg-gray-900 border-white/10 text-gray-300" align="end" forceMount>
+          <DropdownMenuContent className="w-56 dark:bg-gray-900 bg-white dark:border-white/10 border-gray-200 dark:text-gray-300 text-gray-700" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none text-white">
+                <p className="text-sm font-medium leading-none dark:text-white text-gray-800">
                   {user?.name || "User Name"}
                 </p>
-                <p className="text-xs leading-none text-gray-400">
+                <p className="text-xs leading-none dark:text-gray-400 text-gray-500">
                   {user?.email || "user@example.com"}
                 </p>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuSeparator className="dark:bg-white/10 bg-gray-200" />
             <DropdownMenuItem
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="cursor-pointer hover:bg-white/5 focus:bg-white/5"
+              className="cursor-pointer dark:hover:bg-white/5 hover:bg-purple-100/90 dark:focus:bg-white/5 focus:bg-purple-100/90 transition-all duration-200"
             >
               Log out
             </DropdownMenuItem>

@@ -1,15 +1,23 @@
 "use client";
 
-import { signIn, useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { LucideGithub } from "lucide-react";
+import Link from "next/link";
 import { ADMIN_GITHUB_USERNAME } from "./constants";
+import { Button } from "@/components/ui/button";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 
 export default function LandingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -18,10 +26,6 @@ export default function LandingPage() {
       router.push(isAdmin ? "/admin" : "/dashboard");
     }
   }, [session, status, router]);
-
-  const handleGitHubSignIn = () => {
-    signIn("github");
-  };
 
   return (
     <div className="dark-glow-bg min-h-screen flex flex-col items-center justify-center relative text-white overflow-hidden">
@@ -83,22 +87,36 @@ export default function LandingPage() {
           Mentoring coders with AI-driven insights and real-time project-based guidance.
         </motion.p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.3 }}
-          className="mb-10 flex justify-center items-center"
-        >
-          <motion.button
-            onClick={handleGitHubSignIn}
-            className="github-connect-btn flex items-center justify-center gap-2"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <LucideGithub size={20} />
-            Connect Your Github
-          </motion.button>
-        </motion.div>
+        <div className="mb-10 flex justify-center items-center">
+          {status === "authenticated" ? (
+            <Link href={session?.user?.username === ADMIN_GITHUB_USERNAME ? "/admin" : "/dashboard"} className="cursor-pointer">
+              <Button
+                className="bg-white text-neutral-900 font-medium py-2 px-6 rounded-md border border-white hover:bg-gray-100 hover:text-neutral-900"
+              >
+                Go to Dashboard
+              </Button>
+            </Link>
+          ) : (
+            <div className="space-x-4">
+              <Link href="/login?tab=login">
+                <Button
+                  variant="outline"
+                  className="border-white text-white hover:bg-white/10"
+                >
+                  Sign In
+                </Button>
+              </Link>
+              
+              <Link href="/login?tab=register">
+                <Button
+                  className="bg-white text-neutral-900 font-medium border border-white hover:bg-gray-100 hover:text-neutral-900"
+                >
+                  Register
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Footer */}

@@ -1,20 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
+import { useRef, useEffect } from "react";
 import { 
   LucideHome, 
-  LucideUser, 
+  LucideUsers, 
   LucideCode,
-  LucideActivity,
-  LucideUsers,
-  LucideSettings,
-  LucideChevronLeft, 
-  LucideChevronRight
+  LucideSchool,
+  LucideGitBranch,
+  LucideMoon,
+  LucideSun
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useTheme } from "@/app/providers/ThemeProvider";
 
 interface SidebarProps {
   role?: "admin" | "user";
@@ -22,147 +28,92 @@ interface SidebarProps {
 }
 
 export function Sidebar({ role = "user", onToggle }: SidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(true);
-  const [isNavigating, setIsNavigating] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
 
-  const sidebarVariants = {
-    expanded: { width: 240, transition: { duration: 0.2 } },
-    collapsed: { width: 70, transition: { duration: 0.2 } },
-  };
-
-  // Only used for manual toggle via button
-  const toggleSidebar = () => {
-    const newState = !isCollapsed;
-    setIsCollapsed(newState);
-    if (onToggle) {
-      onToggle(newState);
-    }
-  };
-
+  // Use useEffect to notify parent component that sidebar is collapsed
   useEffect(() => {
-    // Update parent component about initial state
     if (onToggle) {
-      onToggle(true); // Always start collapsed
+      onToggle(true);
     }
-  }, []);
-
-  // Reset navigation state when pathname changes
-  useEffect(() => {
-    setIsNavigating(false);
-  }, [pathname]);
-
-  const handleMouseEnter = () => {
-    setIsCollapsed(false);
-    if (onToggle) {
-      onToggle(false);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    // Only collapse if we're not in the middle of navigation
-    if (!isNavigating) {
-      setIsCollapsed(true);
-      if (onToggle) {
-        onToggle(true);
-      }
-    }
-  };
-
-  const handleLinkClick = () => {
-    // Mark that we're navigating so sidebar doesn't collapse
-    setIsNavigating(true);
-    // Sidebar will stay open until navigation completes (useEffect above)
-  };
+  }, [onToggle]);
 
   const sidebarItems = role === "admin" 
     ? [
-        { name: "Dashboard", href: "/admin", icon: LucideHome },
+        { name: "Home", href: "/admin", icon: LucideHome },
         { name: "Users", href: "/admin/users", icon: LucideUsers },
+        { name: "Colleges", href: "/admin/colleges", icon: LucideSchool },
         { name: "Projects", href: "/admin/projects", icon: LucideCode },
-        { name: "Activity", href: "/admin/activity", icon: LucideActivity },
-        { name: "Settings", href: "/admin/settings", icon: LucideSettings },
       ]
     : [
         { name: "Home", href: "/dashboard", icon: LucideHome },
         { name: "Projects", href: "/dashboard/projects", icon: LucideCode },
-        { name: "Settings", href: "/dashboard/settings", icon: LucideSettings },
+        { name: "Settings", href: "/dashboard/settings", icon: LucideHome },
       ];
 
   return (
-    <motion.div
-      ref={sidebarRef}
-      variants={sidebarVariants}
-      initial="collapsed"
-      animate={isCollapsed ? "collapsed" : "expanded"}
-      className="h-screen flex flex-col fixed top-0 left-0 z-40 glass-panel border-r border-white/5"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div className="flex items-center justify-between p-5 border-b border-white/5">
-        {!isCollapsed && (
-          <div className="font-bold text-xl text-white">
-            Codementr
+    <TooltipProvider>
+      <motion.div
+        ref={sidebarRef}
+        className="h-screen w-[70px] flex flex-col fixed top-0 left-0 z-40 glass-panel border-r dark:border-white/5 border-gray-200 dark:bg-gray-900 bg-gray-100"
+      >
+        <div className="flex items-center justify-center p-5 border-b dark:border-white/5 border-gray-200">
+          <div className="text-2xl">
+            <LucideGitBranch size={24} className="text-purple-500" />
           </div>
-        )}
-        <button
-          onClick={toggleSidebar}
-          className="p-2 rounded-md hover:bg-white/10 transition-colors text-gray-400 hover:text-white"
-        >
-          {isCollapsed ? <LucideChevronRight size={18} /> : <LucideChevronLeft size={18} />}
-        </button>
-      </div>
+        </div>
 
-      <nav className="flex-1 pt-8 px-3">
-        <ul className="space-y-2">
-          {sidebarItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <li key={item.href}>
-                <Link 
-                  href={item.href}
-                  onClick={handleLinkClick}
-                  className={cn(
-                    "flex items-center rounded-md p-2.5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors",
-                    isActive ? "bg-white/10 text-white" : "",
-                    !isCollapsed && "justify-start w-full"
-                  )}
-                >
-                  <item.icon size={20} className={isActive ? "text-purple-500" : ""} />
-                  {!isCollapsed && (
-                    <span className="ml-3 text-sm">
+        <nav className="flex-1 pt-8 px-3">
+          <ul className="space-y-2">
+            {sidebarItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <li key={item.href}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link 
+                        href={item.href}
+                        className={cn(
+                          "flex items-center justify-center rounded-md p-2.5 dark:text-gray-400 text-gray-500 transition-all duration-200 cursor-pointer",
+                          "hover:bg-purple-100/90 dark:hover:bg-purple-900/80 hover:text-purple-700 dark:hover:text-purple-300",
+                          isActive ? "dark:bg-purple-900/80 bg-purple-100/90 dark:text-purple-300 text-purple-700" : ""
+                        )}
+                      >
+                        <item.icon size={20} className={isActive ? "text-purple-500" : ""} />
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
                       {item.name}
-                    </span>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-      
-      <div className="mt-auto p-4 border-t border-white/5">
-        <Link 
-          href="/dashboard/profile" 
-          onClick={handleLinkClick}
-          className={cn(
-            "flex items-center p-2 rounded-md hover:bg-white/10 transition-colors text-gray-400 hover:text-white",
-            !isCollapsed && "justify-start"
-          )}
-        >
-          <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-xs text-gray-300 border border-gray-700">
-            CM
-          </div>
-          {!isCollapsed && (
-            <div className="ml-3 flex flex-col">
-              <span className="text-sm text-white">User Name</span>
-              <span className="text-xs text-gray-400">user@example.com</span>
-            </div>
-          )}
-        </Link>
-      </div>
-    </motion.div>
+                    </TooltipContent>
+                  </Tooltip>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+        
+        {/* Theme toggle at the bottom */}
+        <div className="mt-auto pb-5 px-3">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={toggleTheme}
+                className="flex items-center justify-center w-full rounded-md p-2.5 dark:text-gray-400 text-gray-500 transition-all duration-200 cursor-pointer hover:bg-purple-100/90 dark:hover:bg-purple-900/80 hover:text-purple-700 dark:hover:text-purple-300"
+              >
+                {theme === 'dark' ? (
+                  <LucideSun size={20} className="text-yellow-400" />
+                ) : (
+                  <LucideMoon size={20} className="text-blue-400" />
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              {theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </motion.div>
+    </TooltipProvider>
   );
 } 

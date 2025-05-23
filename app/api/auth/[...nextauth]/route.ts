@@ -4,12 +4,14 @@ import type { NextAuthOptions } from "next-auth";
 
 // Export authOptions for server-side authentication
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_CLIENT_ID ?? "",
       clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
     }),
   ],
+  debug: process.env.NODE_ENV === 'development',
   callbacks: {
     async jwt({ token, profile }) {
       if (profile) {
@@ -25,7 +27,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: "/",
+    signIn: "/login",
   },
 };
 

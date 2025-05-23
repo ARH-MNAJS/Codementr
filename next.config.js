@@ -1,7 +1,11 @@
-import type { NextConfig } from "next";
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
+  // Ensure we're using the App Router
+  experimental: {
+    // Any experimental features can go here
+  },
+  // Added from next.config.ts
   images: {
     remotePatterns: [
       {
@@ -13,6 +17,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-};
+}
 
-export default nextConfig;
+module.exports = nextConfig 
