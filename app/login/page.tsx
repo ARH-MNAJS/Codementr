@@ -137,10 +137,29 @@ export default function AuthPage() {
     try {
       setLoading(true);
       setError(null);
-      await signIn("github", { callbackUrl: "/dashboard" });
+      
+      // Get the callback URL from the query string
+      const urlParams = new URLSearchParams(window.location.search);
+      const callbackUrl = urlParams.get('callbackUrl') || "/dashboard";
+      
+      console.log("Starting GitHub authentication with callback URL:", callbackUrl);
+      
+      // Add debugging for Vercel
+      const result = await signIn("github", { 
+        callbackUrl,
+        redirect: true,
+      });
+      
+      // This code will only run if redirect is false or the signin fails
+      console.log("SignIn result:", result);
+      if (result?.error) {
+        setError(`Authentication error: ${result.error}`);
+      }
+      
+      setLoading(false);
     } catch (err) {
       setError("Failed to sign in");
-      console.error(err);
+      console.error("Sign in error:", err);
       setLoading(false);
     }
   };
